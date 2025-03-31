@@ -1,0 +1,56 @@
+{
+  "name": "@lendyrium/v1",
+  "description": "🎛 Hedera contracts for the Lendyriumv1 protocol",
+  "version": "1.0.1",
+  "homepage": "https://Lendyrium.org",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "Lendyrium",
+    "Hedera",
+    "v1",
+    "Lendyrium-v1"
+  ],
+  "files": [
+    "contracts",
+    "build"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
+  "scripts": {
+    "lint": "yarn prettier ./test/*.ts --check",
+    "lint:fix": "yarn prettier ./test/*.ts --write",
+    "clean": "rimraf ./build/",
+    "precompile": "yarn clean",
+    "compile": "waffle .waffle.json",
+    "pretest": "yarn compile",
+    "test": "mocha",
+    "prepublishOnly": "yarn test"
+  },
+  "dependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^2.1.8",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@openzeppelin/contracts": "^5.2.0",
+    "@openzeppelin/contracts-upgradeable": "^5.2.0",
+    "@typechain/ethers-v5": "^4.0.0",
+    "@types/chai": "^4.2.6",
+    "@types/mocha": "^5.2.7",
+    "chai": "^4.2.0",
+    "fs": "^0.0.1-security",
+    "hardhat-typechain": "^0.3.5",
+    "mocha": "^6.2.2",
+    "prettier": "^1.19.1",
+    "prompt-sync": "^4.2.0",
+    "rimraf": "^3.0.0",
+    "solc": "0.5.16",
+    "thirdweb": "^5.87.4",
+    "ts-node": "^8.5.4",
+    "typescript": "latest",
+    "web3": "^4.16.0"
+  },
+  "license": "GPL-3.0-or-later"
+}

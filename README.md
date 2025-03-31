@@ -1,4 +1,3 @@
----
 # Lendyrium Protocol Documentation
 
 This documentation provides an in-depth look at the Lending and Borrowing protocol on Hedera, integrated with a robust Disaster Response mechanism. The documentation is divided into five detailed sections covering an overview, architecture, workflow, disaster response integration, and security with future enhancements.
@@ -239,5 +238,3 @@ Ensuring the security of a decentralized protocol is paramount. Both the financi
 The security and robustness of any DeFi protocol are not static; they require continuous audits, regular updates, and active community engagement. By inviting feedback from developers, security experts, and users, the protocol can evolve to meet emerging threats and market conditions. Regular third-party audits and bug bounty programs can further bolster the confidence of the community.
 
 In summary, the protocol’s current design lays a strong foundation with careful consideration for both operational efficiency and security. With planned enhancements and ongoing vigilance, it is well-positioned to become a reliable, secure, and innovative lending and borrowing solution in the decentralized finance ecosystem.
-
----

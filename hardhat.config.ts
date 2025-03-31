@@ -10,8 +10,8 @@ export default {
       allowUnlimitedContractSize: true,
     },
     testnet: {
-      url: 'https://296.rpc.thirdweb.com',
-      accounts: ["your-key-goes-here"],
+      url: 'https://testnet.hashio.io/api',
+      accounts: ["YOUR-KEY-YOUR-COINS"],
       chainId: 296,
    }
   },

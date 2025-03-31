@@ -1,39 +1,87 @@
 const { ethers } = require("hardhat");
+const fs = require("fs");
+const path = require("path");
 
 async function main() {
-  // Step 1: Get the deployer account
-  const [deployer] = await ethers.getSigners();
-  console.log("Deploying contracts with the account:", deployer.address);
+    const [deployer] = await ethers.getSigners();
+    console.log("Deploying contracts with account:", deployer.address);
 
-  // Step 2: Deploy the LendyriumFactory contract
-  const LendyriumFactory = await ethers.getContractFactory("LendyriumFactory");
-  const factory = await LendyriumFactory.deploy();
-  await factory.deployed();
-  console.log("LendyriumFactory deployed to:", factory.address);
+    // 1. Deploy Native Token (WETH mock)
+    const LendyriumToken = await ethers.getContractFactory("LendyriumToken");
+    const nativeToken = await LendyriumToken.deploy(deployer.address);
+    await nativeToken.deployed();
+    console.log("Native Token deployed to:", nativeToken.address);
 
-  // Step 3: Specify parameters for deploying the Lendyrium ecosystem
-  const oracleAddress = "0x0000000000000000000000000000000000000001"; // Example oracle address
-  const judgeAddress = "0x0000000000000000000000000000000000000002"; // Example judge address
-  const nativeToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // Example token address
-  const tx = await factory.deployLendyrium(oracleAddress, judgeAddress, nativeToken);
-  await tx.wait();
-  console.log("Lendyrium ecosystem deployed successfully");
+    // 2. Deploy Factory
+    const LendyriumFactory = await ethers.getContractFactory("LendyriumFactory");
+    const factory = await LendyriumFactory.deploy();
+    await factory.deployed();
+    console.log("Factory deployed to:", factory.address);
 
-  // Step 5: Retrieve the addresses of the deployed contracts
-  const governanceToken = await factory.governanceToken();
-  const dao = await factory.dao();
-  const lendyrium = await factory.lendyrium();
+    // 3. Deploy full ecosystem through factory
+    console.log("Deploying ecosystem through factory...");
+    const tx = await factory.deployLendyrium(
+        deployer.address,  // Judge address
+        nativeToken.address,
+        deployer.address   // Initial owner
+    );
+    await tx.wait();
 
-  // Step 6: Log the deployed contract addresses
-  console.log("LendyriumGovernanceToken deployed to:", governanceToken);
-  console.log("LendyriumDAO deployed to:", dao);
-  console.log("Lendyrium deployed to:", lendyrium);
+    // 4. Get deployed addresses from factory
+    const governanceToken = await factory.governanceToken();
+    const dao = await factory.dao();
+    const lendyrium = await factory.lendyrium();
+    const oracle = await factory.oracle();
+    const disasterResponse = await factory.disasterResponse();
+
+    console.log("\nEcosystem contracts deployed:");
+    console.log("- Governance Token:", governanceToken);
+    console.log("- DAO:", dao);
+    console.log("- Lendyrium:", lendyrium);
+    console.log("- Oracle:", oracle);
+    console.log("- Disaster Response:", disasterResponse);
+
+    // 5. Verify DisasterResponse initialization
+    const drContract = await ethers.getContractAt("DisasterResponse", disasterResponse);
+    const lendyriumInDR = await drContract.lendyrium();
+    if (lendyriumInDR !== lendyrium) {
+        throw new Error("DisasterResponse not initialized with Lendyrium address");
+    }
+
+    // 6. Prepare and save deployment addresses
+    const addresses = {
+        Factory: factory.address,
+        NativeToken: nativeToken.address,
+        GovernanceToken: governanceToken,
+        DAO: dao,
+        Lendyrium: lendyrium,
+        PriceOracle: oracle,
+        DisasterResponse: disasterResponse,
+        Deployer: deployer.address
+    };
+
+    const network = await ethers.provider.getNetwork();
+    const chainId = network.chainId;
+    const filePath = path.join(__dirname, `../deployments/${chainId}.json`);
+    
+    fs.writeFileSync(filePath, JSON.stringify(addresses, null, 2));
+    console.log("\nDeployment addresses saved to:", filePath);
+
+    // 7. Final verification
+    console.log("\nVerifying deployment...");
+    const daoContract = await ethers.getContractAt("LendyriumDAO", dao);
+    const daoGovToken = await daoContract.governanceToken();
+    
+    if (daoGovToken !== governanceToken) {
+        throw new Error("DAO not connected to governance token");
+    }
+    
+    console.log("All contracts verified successfully!");
 }
 
-// Execute the script and handle errors
 main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error("Error deploying contracts:", error);
-    process.exit(1);
-  });
+    .then(() => process.exit(0))
+    .catch(error => {
+        console.error("Deployment failed:", error);
+        process.exit(1);
+    });
